@@ -76,6 +76,7 @@ static uint64_t eui64 = 0;
 static uint64_t appid = 0;
 
 static uint8_t appkey[16] = {};
+static char    handle[12] = {};
 static uint8_t appskey[16] = {};
 static uint8_t nwkskey[16] = {};
 
@@ -188,6 +189,7 @@ static void print_help(void) {
         case ROLE_NO_CFG:
             puts("set appeui <16 hex symbols> -- sets AppEUI");
             puts("set appkey <32 hex symbols> -- sets OTAA network encryption key");
+            puts("set handle <12 symbols> -- sets handle identifier");
             
             #if defined(UNWDS_MAC_LORAWAN)
             puts("set appskey <32 hex symbols> -- sets ABP AppSkey encryption key");
@@ -257,6 +259,11 @@ static int set_cmd(int argc, char **argv)
 
         printf("[ok] AppKey = %s\n", arg);
     }
+    else if(strcmp(type, "handle") == 0) { //add handle to config
+        memcpy(handle, arg, strlen(arg));
+        printf("[ok] Handle = %s\n", arg);
+    }
+
 #if defined(UNWDS_MAC_LORAWAN)
     else if (strcmp(type, "appskey") == 0) {
         if (strlen(arg) != 32) {
@@ -380,7 +387,7 @@ static int save_cmd(int argc, char **argv)
             case ROLE_EMPTY_KEY:
             case ROLE_NO_CFG:
                 /* Set appID, appkey and nonce */
-                status = config_write_main_block(appid, appkey, appskey, nwkskey, devnonce);
+                status = config_write_main_block(appid, appkey, appskey, nwkskey, devnonce, handle);
                 break;
             default:
                 break;
@@ -416,8 +423,10 @@ static void init_config(shell_command_t *commands)
         eui64 = config_get_nodeid();
         appid = config_get_appid();
         devnonce = config_get_devnonce();
+
         
         memcpy(appkey, config_get_appkey(), sizeof(appkey));
+        memcpy(handle, config_get_devhandle(), sizeof(handle));
 
         if ((config_get_role() == ROLE_NO_CFG) || (config_get_role() == ROLE_EMPTY_KEY)) {
             /* Generate ABP keys */
@@ -459,6 +468,8 @@ static void print_config(void)
         
         bytes_to_hex(appkey, 16, s, false);
         printf("AppKey = %s\n", s);
+
+        printf("Handle = %s\n", handle);
         
         #if defined(UNWDS_MAC_LORAWAN)
         bytes_to_hex(appskey, 16, s, false);
@@ -492,7 +503,7 @@ static int init_clear_nvram(int argc, char **argv)
     else if (strcmp(key, "key") == 0) {
         uint8_t appkey_zero[16];
         memset(appkey_zero, 0, 16);
-        if (config_write_main_block(config_get_appid(), appkey_zero, appskey, nwkskey, devnonce)) {
+        if (config_write_main_block(config_get_appid(), appkey_zero, appskey, nwkskey, devnonce, handle)) {
             puts("[ok] Security key was zeroed. Rebooting.");
             NVIC_SystemReset();
         }

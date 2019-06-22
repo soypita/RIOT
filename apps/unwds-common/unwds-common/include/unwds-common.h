@@ -108,8 +108,10 @@ extern shell_command_t shell_commands[UNWDS_SHELL_COMMANDS_MAX];
 typedef struct {
 	uint8_t length;
 	uint8_t data[UNWDS_MAX_DATA_LEN];
-
+		
 	int16_t rssi;
+
+	char handle[12];
 
 	bool as_ack;	/**< This data could be sent as ACK for downlink command */
 } module_data_t;

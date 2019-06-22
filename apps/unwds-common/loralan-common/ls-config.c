@@ -181,7 +181,7 @@ config_role_t config_get_role(void)
     return ROLE_NO_CFG;
 }
 
-bool config_write_main_block(uint64_t appid64, uint8_t appkey[16], uint8_t appskey[8], uint8_t nwkskey[8], uint32_t devnonce)
+bool config_write_main_block(uint64_t appid64, uint8_t appkey[16], uint8_t appskey[8], uint8_t nwkskey[8], uint32_t devnonce, char handle[12])
 {
 	config.dev_nonce = devnonce;
     config.appid64 = appid64;
@@ -189,6 +189,7 @@ bool config_write_main_block(uint64_t appid64, uint8_t appkey[16], uint8_t appsk
     memcpy(config.nwk_key, appkey, 16);
     memcpy(config.apps_key, appskey, 16);
     memcpy(config.nwks_key, nwkskey, 16);
+    memcpy(config.dev_handle, handle, 12);
 
     return save_config_nvram();
 }
@@ -245,6 +246,11 @@ uint8_t *config_get_nwkskey(void)
     return config.nwks_key;
 }
 
+char *config_get_devhandle(void) 
+{
+    return config.dev_handle;
+}
+
 void config_set_appskey(uint8_t *appskey)
 {
     memcpy(config.apps_key, appskey, sizeof(config.apps_key));
@@ -253,6 +259,11 @@ void config_set_appskey(uint8_t *appskey)
 void config_set_nwkskey(uint8_t *nwkskey)
 {
     memcpy(config.nwks_key, nwkskey, sizeof(config.nwks_key));
+}
+
+void config_set_handle(char *handleid)
+{
+    memcpy(config.dev_handle, handleid, sizeof(config.dev_handle));
 }
 
 uint32_t config_get_devnonce(void)

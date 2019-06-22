@@ -739,6 +739,10 @@ static void unwds_callback(module_data_t *buf)
     cpu_update_status();
     int8_t temperature = INT8_MIN;
     uint8_t voltage = 0;
+
+    //Add handle to payload
+    memcpy(buf->handle, config_get_devhandle(), sizeof(buf->handle));
+
     
     if (cpu_status.temp.core_temp != INT16_MIN) {
         temperature = cpu_status.temp.core_temp;
